@@ -1,0 +1,40 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'todolist/style.css' %}">
+<script src="{% static 'todolist/logic.js' %}"></script>
+
+<title>TODO List</title>
+
+<h1>TODO List</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'todolist:addtask' %}" method="post">
+    {% csrf_token %}
+
+    <input type="text" name="task-name" placeholder="Nueva Tarea">
+    <input type="submit" value="Agregar">
+</form>
+{% if t_list %}
+    <ul id="task-list">
+        {% for t in t_list %}
+            <li id="task{{ t.id }}">
+                <form action="{% url 'todolist:taskup' %}" method="post">
+                    {% csrf_token %}
+                    <button>Subir</button>
+                </form>
+                <form action="{% url 'todolist:taskdown' %}" method="post">
+                    {% csrf_token %}
+                    <button>Bajar</button>
+                </form>
+                <form action="{% url 'todolist:removetask' %}" method="post">
+                    {% csrf_token %}
+                    <button onclick="erase(this)">Borrar</button>
+                </form>
+                {{ t.name }}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No hay tareas disponibles.</p>
+{% endif %}
