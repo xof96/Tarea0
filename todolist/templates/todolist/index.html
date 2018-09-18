@@ -21,15 +21,18 @@
             <li id="task{{ t.id }}">
                 <form action="{% url 'todolist:taskup' %}" method="post">
                     {% csrf_token %}
+                    <input type="hidden" name="up" value="{{ t.id }}">
                     <button>Subir</button>
                 </form>
                 <form action="{% url 'todolist:taskdown' %}" method="post">
                     {% csrf_token %}
+                    <input type="hidden" name="down" value="{{ t.id }}">
                     <button>Bajar</button>
                 </form>
                 <form action="{% url 'todolist:removetask' %}" method="post">
                     {% csrf_token %}
-                    <button onclick="erase(this)">Borrar</button>
+                    <input type="hidden" name="erase" value="{{ t.id }}">
+                    <button>Borrar</button>
                 </form>
                 {{ t.name }}
             </li>
