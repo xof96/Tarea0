@@ -5,11 +5,14 @@ from django.urls import reverse
 from .models import Task
 
 
-def index(request):
+def index(request, err_me=None):
+    error_message = err_me
     t_list = Task.objects.all()
     context = {
         't_list': t_list,
     }
+    if error_message is not None:
+        context['error_message'] = error_message
     return render(request, 'todolist/index.html', context)
 
 
@@ -48,9 +51,7 @@ def task_up(request):
                 task.save()
                 prev_task.save()
             except (KeyError, Task.DoesNotExist):
-                raise render(request, 'todolist/index.html', {
-                    'error_message': "Tarea no puede ser subida"
-                })
+                return HttpResponseRedirect(reverse('todolist:index'))
         except Task.DoesNotExist:
             raise Http404("Tarea no existe")
     return HttpResponseRedirect(reverse('todolist:index'))
@@ -70,9 +71,7 @@ def task_down(request):
                 task.save()
                 next_task.save()
             except (KeyError, Task.DoesNotExist):
-                raise render(request, 'todolist/index.html', {
-                    'error_message': "Tarea no puede ser bajada"
-                })
+                return HttpResponseRedirect(reverse('todolist:index'))
         except Task.DoesNotExist:
             raise Http404("Tarea no existe")
     return HttpResponseRedirect(reverse('todolist:index'))
