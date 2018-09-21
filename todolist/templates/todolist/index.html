@@ -4,40 +4,43 @@
 <script src="{% static 'todolist/logic.js' %}"></script>
 
 <title>TODO List</title>
-
-<h1>TODO List</h1>
+<div class="header">
+    <h1>TODO List</h1>
+</div>
 
 {% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+<div class="input-form">
+    <form action="{% url 'todolist:addtask' %}" method="post">
+        {% csrf_token %}
 
-<form action="{% url 'todolist:addtask' %}" method="post">
-    {% csrf_token %}
+        <input type="text" name="task-name" placeholder="Nueva Tarea">
+        <input class="button text-input-button" type="submit" value="Agregar">
+    </form>
+</div>
 
-    <input type="text" name="task-name" placeholder="Nueva Tarea">
-    <input type="submit" value="Agregar">
-</form>
 {% if t_list %}
-    <ul id="task-list">
+    <div class="task-list">
         {% for t in t_list %}
-            <li id="task{{ t.id }}">
+            <div class="task-item">
                 <form action="{% url 'todolist:taskup' %}" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="up" value="{{ t.id }}">
-                    <button>Subir</button>
+                    <button class="button up-button">Subir</button>
                 </form>
                 <form action="{% url 'todolist:taskdown' %}" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="down" value="{{ t.id }}">
-                    <button>Bajar</button>
+                    <button class="button down-button">Bajar</button>
                 </form>
                 <form action="{% url 'todolist:removetask' %}" method="post">
                     {% csrf_token %}
                     <input type="hidden" name="erase" value="{{ t.id }}">
-                    <button>Borrar</button>
+                    <button class="button delete-button">Borrar</button>
                 </form>
                 {{ t.name }}
-            </li>
+            </div>
         {% endfor %}
-    </ul>
+    </div>
 {% else %}
     <p>No hay tareas disponibles.</p>
 {% endif %}
