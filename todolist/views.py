@@ -7,7 +7,7 @@ from .models import Task
 
 def index(request, err_me=None):
     error_message = err_me
-    t_list = Task.objects.all()
+    t_list = Task.objects.order_by('priority')
     context = {
         't_list': t_list,
     }
@@ -19,7 +19,8 @@ def index(request, err_me=None):
 def add_task(request):
     task_name = request.POST.get('task-name', False)
     if task_name is not False and task_name != "":
-        t = Task(name=task_name)
+        p = len(Task.objects.all()) + 1
+        t = Task(name=task_name, priority=p)
         t.save()
     return HttpResponseRedirect(reverse('todolist:index'))
 
@@ -43,11 +44,12 @@ def task_up(request):
         task_id = int(t_id)
         try:
             task = Task.objects.get(id=task_id)
+            task_p = task.priority
             try:
-                prev_id = task_id - 1
-                prev_task = Task.objects.get(id=prev_id)
-                task.id = prev_id
-                prev_task.id = task_id
+                prev_p = task_p - 1
+                prev_task = Task.objects.get(priority=prev_p)
+                task.priority = prev_p
+                prev_task.priority = task_p
                 task.save()
                 prev_task.save()
             except (KeyError, Task.DoesNotExist):
@@ -63,11 +65,12 @@ def task_down(request):
         task_id = int(t_id)
         try:
             task = Task.objects.get(id=task_id)
+            task_p = task.priority
             try:
-                next_id = task_id + 1
-                next_task = Task.objects.get(id=next_id)
-                task.id = next_id
-                next_task.id = task_id
+                next_p = task_p + 1
+                next_task = Task.objects.get(priority=next_p)
+                task.priority = next_p
+                next_task.priority = task_p
                 task.save()
                 next_task.save()
             except (KeyError, Task.DoesNotExist):
