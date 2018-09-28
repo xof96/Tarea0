@@ -31,7 +31,14 @@ def remove_task(request):
         task_id = int(t_id)
         try:
             task = Task.objects.get(id=task_id)
+            pri = task.priority
             task.delete()
+            arr_t = Task.objects.all()
+            for t in arr_t:
+                if t.priority > pri:
+                    t.priority -= 1
+                    t.save()
+
         except Task.DoesNotExist:
             raise Http404("Tarea no existe")
 
