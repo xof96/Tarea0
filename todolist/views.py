@@ -7,7 +7,7 @@ from .models import Task
 
 def index(request, err_me=None):
     error_message = err_me
-    t_list = Task.objects.order_by('priority')
+    t_list = Task.objects.order_by('-priority')
     context = {
         't_list': t_list,
     }
@@ -19,7 +19,7 @@ def index(request, err_me=None):
 def add_task(request):
     task_name = request.POST.get('task-name', False)
     if task_name is not False and task_name != "":
-        p = len(Task.objects.all()) + 1
+        p = Task.objects.order_by('-priority')[0].priority + 1
         t = Task(name=task_name, priority=p)
         t.save()
     return HttpResponseRedirect(reverse('todolist:index'))
@@ -31,13 +31,7 @@ def remove_task(request):
         task_id = int(t_id)
         try:
             task = Task.objects.get(id=task_id)
-            pri = task.priority
             task.delete()
-            arr_t = Task.objects.all()
-            for t in arr_t:
-                if t.priority > pri:
-                    t.priority -= 1
-                    t.save()
 
         except Task.DoesNotExist:
             raise Http404("Tarea no existe")
@@ -53,13 +47,13 @@ def task_up(request):
             task = Task.objects.get(id=task_id)
             task_p = task.priority
             try:
-                prev_p = task_p - 1
-                prev_task = Task.objects.get(priority=prev_p)
-                task.priority = prev_p
+                prev_task = Task.objects.filter(priority__gt=task_p).order_by('priority')[0]
+                prev_p = prev_task.priority
                 prev_task.priority = task_p
+                task.priority = prev_p
                 task.save()
                 prev_task.save()
-            except (KeyError, Task.DoesNotExist):
+            except (KeyError, Task.DoesNotExist, IndexError):
                 return HttpResponseRedirect(reverse('todolist:index'))
         except Task.DoesNotExist:
             raise Http404("Tarea no existe")
@@ -74,13 +68,13 @@ def task_down(request):
             task = Task.objects.get(id=task_id)
             task_p = task.priority
             try:
-                next_p = task_p + 1
-                next_task = Task.objects.get(priority=next_p)
-                task.priority = next_p
+                next_task = Task.objects.filter(priority__lt=task_p).order_by('-priority')[0]
+                next_p = next_task.priority
                 next_task.priority = task_p
+                task.priority = next_p
                 task.save()
                 next_task.save()
-            except (KeyError, Task.DoesNotExist):
+            except (KeyError, Task.DoesNotExist, IndexError):
                 return HttpResponseRedirect(reverse('todolist:index'))
         except Task.DoesNotExist:
             raise Http404("Tarea no existe")
